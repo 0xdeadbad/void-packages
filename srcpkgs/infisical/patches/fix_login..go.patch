@@ -1,5 +1,5 @@
---- a/packages/cmd/login.go	2023-10-13 03:18:59.436901696 -0300
-+++ b/packages/cmd/login.go	2023-10-13 03:23:37.911320438 -0300
+--- a/cli/packages/cmd/login.go	2023-10-13 03:18:59.436901696 -0300
++++ b/cli/packages/cmd/login.go	2023-10-13 03:23:37.911320438 -0300
 @@ -117,7 +117,7 @@
  
  		err = util.StoreUserCredsInKeyRing(&userCredentialsToBeStored)

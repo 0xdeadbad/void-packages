@@ -2,53 +2,33 @@
 pkgname=infisical
 version=0.14.2
 revision=1
-archs="x86_64 aarch64"
-create_wrksrc=true
-makedepends="go wget tar"
-checkdepends="go git"
-short_desc="CLI tool for infisical, an open-source secret management platform"
+build_style=go
+build_helper="qemu"
+build_wrksrc="cli"
+go_import_path="github.com/Infisical/infisical-merge"
+go_ldflags="-X github.com/Infisical/infisical-merge/packages/util.CLI_VERSION=${version}"
+checkdepends="git"
+short_desc="Open-source secret management platform (CLI)"
 maintainer="Matheus Garcias <matheus.dasilva.garcias@gmail.com>"
 license="MIT"
 homepage="https://infisical.com"
 distfiles="https://github.com/Infisical/infisical/archive/refs/tags/infisical-cli/v${version}.tar.gz"
 checksum=313caf8d4e6ca5fd88d4f2adf72c721958d602404b6f80611a78a2f757d993f1
-fetch_cmd="wget"
-nopie=true
-XBPS_CHECK_PKGS=true
 
-unset build_style
-
-function do_extract() {
-    tar -xvzf ${XBPS_SRCDISTDIR}/${pkgname}-${version}/v${version}.tar.gz \
-        --strip-components=2 \
-        infisical-infisical-cli-v${version}/cli
+do_check() {
+	go test ./...
 }
 
-function do_build() {
-    go build \
-        -o infisical \
-        --ldflags="-X \"github.com/Infisical/infisical-merge/packages/util.CLI_VERSION=${version}\"" \
-        ${XBPS_BUILDDIR}/${pkgname}-${version}
-}
+post_install() {
+	mv "${DESTDIR}"/usr/bin/infisical-merge "${DESTDIR}"/usr/bin/infisical
 
-function do_check() {
-    [ "$(./infisical --version)" = "infisical version ${version}" ] || return 1
-    go test github.com/Infisical/infisical-merge/packages/cmd
-    go test github.com/Infisical/infisical-merge/report
-    go test github.com/Infisical/infisical-merge/config
-    go test github.com/Infisical/infisical-merge/detect
-}
+	go run . man > infisical.1
+	vman infisical.1
 
-function do_install() {
-    vbin infisical
-}
+	for sh in bash zsh fish; do
+		go run . completion "$sh" > "infisical.$sh"
+		vcompletion "infisical.$sh" "$sh"
+	done
 
-function post_install() {
-    go run . man | gzip -c > "infisical.1.gz"
-    vman "infisical.1.gz"
-
-    for sh in bash zsh fish; do
-	    go run . completion "$sh" > "infisical.$sh"
-        vcompletion "infisical.$sh" "$sh"
-    done
+	vlicense "${wrksrc}"/LICENSE
 }
