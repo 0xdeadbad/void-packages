@@ -22,11 +22,11 @@ do_check() {
 post_install() {
 	mv "${DESTDIR}"/usr/bin/infisical-merge "${DESTDIR}"/usr/bin/infisical
 
-	go run . man > infisical.1
+	vtargetrun "${DESTDIR}"/usr/bin/infisical man > infisical.1
 	vman infisical.1
 
 	for sh in bash zsh fish; do
-		go run . completion "$sh" > "infisical.$sh"
+		vtargetrun "${DESTDIR}"/usr/bin/infisical completion "$sh" > "infisical.$sh"
 		vcompletion "infisical.$sh" "$sh"
 	done
 
